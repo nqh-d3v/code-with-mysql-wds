@@ -4,7 +4,7 @@ Về kiến thức cơ bản, bạn xem lại các tài liệu mà ban lập tr�
 
 Đa phần các dự án của CLB sẽ chạy cùng với cơ sở dữ liệu là `mysql`, nên chuỗi bài hướng dẫn bên dưới là dành cho các dự án có sử dụng `mysql`.
 # Sub 1
-
+#### Mô tả về source code
 Khi nhìn vào source code của 1 project, source code đa phần có dạng như sau:
 ```
   ┌ README.md: đây là file mô tả project đó làm cái gì.
@@ -26,8 +26,8 @@ Bên trên, mình đã mô tả sơ qua, cấu trúc thư mục của mỗi dự
       │                  └ ... Các models khác nếu có.
       └ ... Các module khác
 ```
------
 
+#### When client call API, what's happen?
 Trên đây, mình đã mô tả các file và thư mục trong source code của các dự án có sử dụng `mysql` làm cơ sở dữ liệu. Tiếp theo mình sẽ mô tả, mỗi khi call APIs thì cách xử lý nó sẽ như thế nào.
 
 Ví dụ, mình call 1 api có dạng `https://example.com/api/v1/account/create` với phương thức là `POST`.
@@ -51,3 +51,33 @@ Ví dụ, mình call 1 api có dạng `https://example.com/api/v1/account/create
                          │                             đó trả về cho client.
 ```
 Nếu nó kiểm tra và thấy không tồn tại thì trả về lỗi là 404 - Not Found.
+
+Một lưu ý nho nhỏ là `controller` của mỗi module chỉ được khai báo để thực hiện thao tác cho module đó, có nghĩa là các `controller` chỉ được khai báo khi module đó cần thực hiện thao tác gì cần gọi đến nó (được xử lý trong index.js). Còn `services` thì cũng giống như vậy, nó được khai báo để thực hiện các thao tác liên quan đến cơ sở dữ liệu cho module hiện tại và có thể được gọi từ các controller hoặc các hàm cần thực hiện các thao tác liên quan đến module đó, ví dụ, khi đăng nhập hoặc đăng ký, `controller` module `auth` sẽ gọi đến service của `account` để lấy thông tin hoặc lưu thông tin tìa khoản vào cơ sở dữ liệu.
+
+#### What is index.js and more...
+Dễ thấy trong source có khá nhiều file tên là `index.js`, tại sao phải là `index.js` mà không phải là gì khác. Ngoài ra, trong một số file, còn có  một số dòng khai báo require đến 1 thư mục (ví dụ `const a = require('/c/d/e');`).
+
+Nó có gì liên quan không, mặc định, khi bạn require 1 thư mục, thì nó sẽ tìm đến file `index.js` trong thư mục đó, trong ví dụ trên, có nghĩa là bạn đang require đến file `/c/d/e/index.js`. Và trong `index.js` phải có 1 dòng `export`, lúc này. Bạn bắt đầu rối về require, export và import nó khác nhau như nào đúng không.
+
+Để hiểu rõ về sự khác nhau giữa chúng, bạn tham khảo tại [Import và Export trong JavaScript](https://viblo.asia/p/import-va-export-trong-javascript-maGK7bxM5j2) và [Require vs import](https://viblo.asia/q/phan-biet-cu-phap-require-va-import-aGK7Jooe5j2).
+
+-----
+
+### Bây giờ, khi bạn làm các chức năng cho module thì bạn sẽ cần phải làm gì.
+Đối với 1 module, nó sẽ có nhiều chức năng cần phải làm phụ thuộc vào yêu cầu từ phía khách hàng. Về cách code như nào, mình sẽ nói chi tiết ở bài 3.
+
+Thông thường, các bạn trưởng ban sẽ phân tích yêu cầu từ đặc tả mà bạn quản lý dự án giao, thì tùy theo yêu cầu đó, bạn được giao làm phần nào (module nào) thì bạn sẽ phải thực hiện module đó theo yêu cầu từ bạn leader. (Nếu là mình, thông thường mình sẽ mô tả nó trong file README.md).
+
+Bạn đã được học qua Git qua 2 buổi training, thì bạn đã hiểu về cách làm việc với git như thế nào rồi, bạn cũng hiểu git làm gì rồi nên mình sẽ không đề cập nữa.
+
+Ví dụ bạn được giao hoàn thành module `account`, bạn vào tài khoản Gitlab (hoặc GitHub tùy từng dự án) của mình, vào source, nếu chưa được cấp quyền thì nhắn tin cho leader hoặc nhắn trong team dự án. Sau đó bạn cần thực hiện tuần tự các bước sau:
+1. Clone dự án về máy của bản thân.
+2. Vào đọc phần README để xem cần setup những gì để có thể chạy app, có cần cài đặt biến môi trường gì không,...
+3. Tuy vào phần được giao, tạo branch mới ở local và trên Gitlab. (Gõ `git checkout -B account` để tạo branch `account` ở local).
+4. Setup app
+  - `npm i --save`: Để cài đặt các package cần thiết (hoặc `yarn install` nếu đã cài đặt `yarn`).
+  - `npm start`: Để khởi chạy ứng dụng. Nếu bị lỗi, xem lại README xem có đọc thiếu hay gì không. Nếu không thì search Google xem lỗi đó là lỗi gì.
+
+-----
+
+Ở bài tiếp theo mình sẽ nói sơ qua về các thao tác với cơ sở dữ liệu và các phương thức request (GET, POST, PUT, DELETE,...).
